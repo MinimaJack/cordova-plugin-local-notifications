@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import cordova.plugin.badge.BadgeImpl;
+import de.appplant.cordova.plugin.badge.BadgeImpl;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.M;
