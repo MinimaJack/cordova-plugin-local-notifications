@@ -241,7 +241,7 @@ public final class Options {
 
         if (!options.optString("channel").isEmpty() || SDK_INT < O) {
             String channelId = options.optString("channel", DEFAULT_CHANNEL_ID);
-            Manager.getInstance(context).createChannel(channelId, channelName != null ? channelName : "default-channel-name", shouldVibrate, soundUri);
+            Manager.getInstance(context).createChannel(channelId, channelName != null ? channelName : "default-channel-name", 4, shouldVibrate, soundUri);
 
             return channelId;
         }
