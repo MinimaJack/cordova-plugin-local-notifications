@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package de.appplant.cordova.plugin.localnotification;
+package cordova.plugin.localnotification;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -27,18 +27,18 @@ import android.os.PowerManager;
 
 import java.util.Calendar;
 
-import de.appplant.cordova.plugin.notification.Builder;
-import de.appplant.cordova.plugin.notification.Manager;
-import de.appplant.cordova.plugin.notification.Notification;
-import de.appplant.cordova.plugin.notification.Options;
-import de.appplant.cordova.plugin.notification.Request;
-import de.appplant.cordova.plugin.notification.receiver.AbstractTriggerReceiver;
+import cordova.plugin.notification.Builder;
+import cordova.plugin.notification.Manager;
+import cordova.plugin.notification.Notification;
+import cordova.plugin.notification.Options;
+import cordova.plugin.notification.Request;
+import cordova.plugin.notification.receiver.AbstractTriggerReceiver;
 
 import static android.content.Context.POWER_SERVICE;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
-import static de.appplant.cordova.plugin.localnotification.LocalNotification.fireEvent;
-import static de.appplant.cordova.plugin.localnotification.LocalNotification.isAppRunning;
+import static cordova.plugin.localnotification.LocalNotification.fireEvent;
+import static cordova.plugin.localnotification.LocalNotification.isAppRunning;
 import static java.util.Calendar.MINUTE;
 
 /**

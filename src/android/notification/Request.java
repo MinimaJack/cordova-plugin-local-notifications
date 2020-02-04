@@ -21,7 +21,7 @@
  * @APPPLANT_LICENSE_HEADER_END@
  */
 
-package de.appplant.cordova.plugin.notification;
+package cordova.plugin.notification;
 
 import org.json.JSONObject;
 
@@ -30,11 +30,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import de.appplant.cordova.plugin.notification.trigger.DateTrigger;
-import de.appplant.cordova.plugin.notification.trigger.IntervalTrigger;
-import de.appplant.cordova.plugin.notification.trigger.MatchTrigger;
+import cordova.plugin.notification.trigger.DateTrigger;
+import cordova.plugin.notification.trigger.IntervalTrigger;
+import cordova.plugin.notification.trigger.MatchTrigger;
 
-import static de.appplant.cordova.plugin.notification.trigger.IntervalTrigger.Unit;
+import static cordova.plugin.notification.trigger.IntervalTrigger.Unit;
 
 /**
  * An object you use to specify a notification’s content and the condition

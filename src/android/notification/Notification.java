@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package de.appplant.cordova.plugin.notification;
+package cordova.plugin.notification;
 
 import android.app.AlarmManager;
 import android.app.NotificationManager;

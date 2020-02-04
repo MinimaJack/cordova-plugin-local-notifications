@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package de.appplant.cordova.plugin.notification.util;
+package cordova.plugin.notification.util;
 
 import android.content.ContentResolver;
 import android.content.Context;

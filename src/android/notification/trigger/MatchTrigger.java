@@ -19,18 +19,18 @@
  * limitations under the License.
  */
 
-package de.appplant.cordova.plugin.notification.trigger;
+package cordova.plugin.notification.trigger;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import static de.appplant.cordova.plugin.notification.trigger.DateTrigger.Unit.DAY;
-import static de.appplant.cordova.plugin.notification.trigger.DateTrigger.Unit.HOUR;
-import static de.appplant.cordova.plugin.notification.trigger.DateTrigger.Unit.MINUTE;
-import static de.appplant.cordova.plugin.notification.trigger.DateTrigger.Unit.MONTH;
-import static de.appplant.cordova.plugin.notification.trigger.DateTrigger.Unit.WEEK;
-import static de.appplant.cordova.plugin.notification.trigger.DateTrigger.Unit.YEAR;
+import static cordova.plugin.notification.trigger.DateTrigger.Unit.DAY;
+import static cordova.plugin.notification.trigger.DateTrigger.Unit.HOUR;
+import static cordova.plugin.notification.trigger.DateTrigger.Unit.MINUTE;
+import static cordova.plugin.notification.trigger.DateTrigger.Unit.MONTH;
+import static cordova.plugin.notification.trigger.DateTrigger.Unit.WEEK;
+import static cordova.plugin.notification.trigger.DateTrigger.Unit.YEAR;
 import static java.util.Calendar.DAY_OF_WEEK;
 import static java.util.Calendar.WEEK_OF_MONTH;
 import static java.util.Calendar.WEEK_OF_YEAR;

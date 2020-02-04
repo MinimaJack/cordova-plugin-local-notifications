@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package de.appplant.cordova.plugin.notification;
+package cordova.plugin.notification;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -42,10 +42,10 @@ import android.graphics.Canvas;
 import java.util.List;
 import java.util.Random;
 
-import de.appplant.cordova.plugin.notification.action.Action;
+import cordova.plugin.notification.action.Action;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
-import static de.appplant.cordova.plugin.notification.Notification.EXTRA_UPDATE;
+import static cordova.plugin.notification.Notification.EXTRA_UPDATE;
 
 /**
  * Builder class for local notifications. Build fully configured local

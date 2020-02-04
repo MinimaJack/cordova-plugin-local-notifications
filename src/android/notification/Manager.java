@@ -21,7 +21,7 @@
 
 // codebeat:disable[TOO_MANY_FUNCTIONS]
 
-package de.appplant.cordova.plugin.notification;
+package cordova.plugin.notification;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import de.appplant.cordova.plugin.badge.BadgeImpl;
+import cordova.plugin.badge.BadgeImpl;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.M;
@@ -47,8 +47,8 @@ import static android.os.Build.VERSION_CODES.O;
 import static android.support.v4.app.NotificationManagerCompat.IMPORTANCE_DEFAULT;
 import static android.support.v4.app.NotificationManagerCompat.IMPORTANCE_HIGH;
 import static android.support.v4.app.NotificationManagerCompat.IMPORTANCE_LOW;
-import static de.appplant.cordova.plugin.notification.Notification.PREF_KEY_ID;
-import static de.appplant.cordova.plugin.notification.Notification.Type.TRIGGERED;
+import static cordova.plugin.notification.Notification.PREF_KEY_ID;
+import static cordova.plugin.notification.Notification.Type.TRIGGERED;
 
 /**
  * Central way to access all or single local notifications set by specific

@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package de.appplant.cordova.plugin.notification.trigger;
+package cordova.plugin.notification.trigger;
 
 import java.util.Calendar;
 import java.util.Date;

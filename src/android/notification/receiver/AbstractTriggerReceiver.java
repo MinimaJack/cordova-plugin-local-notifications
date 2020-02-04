@@ -19,17 +19,17 @@
  * limitations under the License.
  */
 
-package de.appplant.cordova.plugin.notification.receiver;
+package cordova.plugin.notification.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import de.appplant.cordova.plugin.notification.Builder;
-import de.appplant.cordova.plugin.notification.Manager;
-import de.appplant.cordova.plugin.notification.Notification;
-import de.appplant.cordova.plugin.notification.Options;
+import cordova.plugin.notification.Builder;
+import cordova.plugin.notification.Manager;
+import cordova.plugin.notification.Notification;
+import cordova.plugin.notification.Options;
 
 /**
  * Abstract broadcast receiver for local notifications. Creates the

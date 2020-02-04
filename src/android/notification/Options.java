@@ -21,7 +21,7 @@
 
 // codebeat:disable[TOO_MANY_FUNCTIONS]
 
-package de.appplant.cordova.plugin.notification;
+package cordova.plugin.notification;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -39,9 +39,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import de.appplant.cordova.plugin.notification.action.Action;
-import de.appplant.cordova.plugin.notification.action.ActionGroup;
-import de.appplant.cordova.plugin.notification.util.AssetUtil;
+import cordova.plugin.notification.action.Action;
+import cordova.plugin.notification.action.ActionGroup;
+import cordova.plugin.notification.util.AssetUtil;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.O;

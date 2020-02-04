@@ -19,16 +19,16 @@
  * limitations under the License.
  */
 
-package de.appplant.cordova.plugin.localnotification;
+package cordova.plugin.localnotification;
 
 import android.os.Bundle;
 
-import de.appplant.cordova.plugin.notification.Notification;
-import de.appplant.cordova.plugin.notification.receiver.AbstractClearReceiver;
+import cordova.plugin.notification.Notification;
+import cordova.plugin.notification.receiver.AbstractClearReceiver;
 
-import static de.appplant.cordova.plugin.localnotification.LocalNotification.fireEvent;
-import static de.appplant.cordova.plugin.localnotification.LocalNotification.isAppRunning;
-import static de.appplant.cordova.plugin.notification.Request.EXTRA_LAST;
+import static cordova.plugin.localnotification.LocalNotification.fireEvent;
+import static cordova.plugin.localnotification.LocalNotification.isAppRunning;
+import static cordova.plugin.notification.Request.EXTRA_LAST;
 
 /**
  * The clear intent receiver is triggered when the user clears a

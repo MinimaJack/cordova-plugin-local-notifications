@@ -21,7 +21,7 @@
 
 // codebeat:disable[TOO_MANY_FUNCTIONS]
 
-package de.appplant.cordova.plugin.localnotification;
+package cordova.plugin.localnotification;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -43,14 +43,14 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.appplant.cordova.plugin.notification.Manager;
-import de.appplant.cordova.plugin.notification.Notification;
-import de.appplant.cordova.plugin.notification.Options;
-import de.appplant.cordova.plugin.notification.Request;
-import de.appplant.cordova.plugin.notification.action.ActionGroup;
+import cordova.plugin.notification.Manager;
+import cordova.plugin.notification.Notification;
+import cordova.plugin.notification.Options;
+import cordova.plugin.notification.Request;
+import cordova.plugin.notification.action.ActionGroup;
 
-import static de.appplant.cordova.plugin.notification.Notification.Type.SCHEDULED;
-import static de.appplant.cordova.plugin.notification.Notification.Type.TRIGGERED;
+import static cordova.plugin.notification.Notification.Type.SCHEDULED;
+import static cordova.plugin.notification.Notification.Type.TRIGGERED;
 
 /**
  * This plugin utilizes the Android AlarmManager in combination with local

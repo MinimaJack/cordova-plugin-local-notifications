@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package de.appplant.cordova.plugin.localnotification;
+package cordova.plugin.localnotification;
 
 import android.os.Bundle;
 import android.support.v4.app.RemoteInput;
@@ -27,12 +27,12 @@ import android.support.v4.app.RemoteInput;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import de.appplant.cordova.plugin.notification.Notification;
-import de.appplant.cordova.plugin.notification.receiver.AbstractClickReceiver;
+import cordova.plugin.notification.Notification;
+import cordova.plugin.notification.receiver.AbstractClickReceiver;
 
-import static de.appplant.cordova.plugin.localnotification.LocalNotification.fireEvent;
-import static de.appplant.cordova.plugin.notification.Options.EXTRA_LAUNCH;
-import static de.appplant.cordova.plugin.notification.Request.EXTRA_LAST;
+import static cordova.plugin.localnotification.LocalNotification.fireEvent;
+import static cordova.plugin.notification.Options.EXTRA_LAUNCH;
+import static cordova.plugin.notification.Request.EXTRA_LAST;
 
 /**
  * The receiver activity is triggered when a notification is clicked by a user.

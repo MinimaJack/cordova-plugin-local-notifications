@@ -21,18 +21,18 @@
  * @APPPLANT_LICENSE_HEADER_END@
  */
 
-package de.appplant.cordova.plugin.localnotification;
+package cordova.plugin.localnotification;
 
 import android.content.Context;
 import android.util.Log;
 
 import java.util.Date;
 
-import de.appplant.cordova.plugin.notification.Builder;
-import de.appplant.cordova.plugin.notification.Manager;
-import de.appplant.cordova.plugin.notification.Notification;
-import de.appplant.cordova.plugin.notification.Request;
-import de.appplant.cordova.plugin.notification.receiver.AbstractRestoreReceiver;
+import cordova.plugin.notification.Builder;
+import cordova.plugin.notification.Manager;
+import cordova.plugin.notification.Notification;
+import cordova.plugin.notification.Request;
+import cordova.plugin.notification.receiver.AbstractRestoreReceiver;
 
 /**
  * This class is triggered upon reboot of the device. It needs to re-register
