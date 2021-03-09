@@ -96,7 +96,7 @@
 
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="LocalNotification">
-                <param name="android-package" value="cordova.plugin.localnotification.LocalNotification"/>
+                <param name="android-package" value="cordova.plugin.notification.LocalNotification"/>
             </feature>
         </config-file>
 
@@ -112,19 +112,19 @@
             </provider>
 
             <receiver
-                android:name="cordova.plugin.localnotification.TriggerReceiver"
+                android:name="cordova.plugin.notification.TriggerReceiver"
                 android:exported="false" />
 
             <receiver
-                android:name="cordova.plugin.localnotification.ClearReceiver"
+                android:name="cordova.plugin.notification.ClearReceiver"
                 android:exported="false" />
 
             <service
-                android:name="cordova.plugin.localnotification.ClickReceiver"
+                android:name="cordova.plugin.notification.ClickReceiver"
                 android:exported="false" />
 
             <receiver
-                android:name="cordova.plugin.localnotification.RestoreReceiver"
+                android:name="cordova.plugin.notification.RestoreReceiver"
                 android:directBootAware="true"
                 android:exported="false" >
                 <intent-filter>
@@ -147,23 +147,23 @@
 
         <source-file
             src="src/android/LocalNotification.java"
-            target-dir="src/cordova/plugin/localnotification" />
+            target-dir="src/cordova/plugin/notification" />
 
         <source-file
             src="src/android/TriggerReceiver.java"
-            target-dir="src/cordova/plugin/localnotification" />
+            target-dir="src/cordova/plugin/notification" />
 
         <source-file
             src="src/android/ClickReceiver.java"
-            target-dir="src/cordova/plugin/localnotification" />
+            target-dir="src/cordova/plugin/notification" />
 
         <source-file
             src="src/android/ClearReceiver.java"
-            target-dir="src/cordova/plugin/localnotification" />
+            target-dir="src/cordova/plugin/notification" />
 
         <source-file
             src="src/android/RestoreReceiver.java"
-            target-dir="src/cordova/plugin/localnotification" />
+            target-dir="src/cordova/plugin/notification" />
 
         <source-file
             src="src/android/notification/action/Action.java"
