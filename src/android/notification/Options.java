@@ -60,10 +60,10 @@ import static androidx.core.app.NotificationCompat.VISIBILITY_SECRET;
  */
 public final class Options {
     // Default Channel ID for SDK < 26
-    static final String DEFAULT_CHANNEL_ID = "channel-id-default";
+    static final String DEFAULT_CHANNEL_ID = "default-channel-id";
 
     // Silent channel
-    static final String SILENT_CHANNEL_ID = "channel-id-silent";
+    static final String SILENT_CHANNEL_ID = "silent-channel-id";
     static final CharSequence SILENT_CHANNEL_NAME = "Silent Notifications";
 
     // Vibrate only channel
@@ -498,7 +498,7 @@ public final class Options {
      */
     public boolean isWithoutSound() {
         Object value = options.opt("sound");
-        return value == null || value.equals(false);
+        return value == null || value.equals(false) || options.optInt("alarmVolume") == 0;
     }
 
     /**
