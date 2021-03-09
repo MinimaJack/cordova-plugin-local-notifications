@@ -446,6 +446,13 @@ public final class Options {
     }
 
     /**
+     * Requires immediate attention.
+     */
+    boolean isImmediate() {
+        return options.optBoolean("immediate", false);
+    }
+
+    /**
      * Small icon resource ID for the local notification.
      */
     int getSmallIcon() {
@@ -565,9 +572,12 @@ public final class Options {
      * Gets the notifications priority.
      */
     int getPrio() {
-        int prio = options.optInt("priority");
-
-        return Math.min(Math.max(prio, PRIORITY_MIN), PRIORITY_MAX);
+        if (isImmediate()) {
+            return PRIORITY_MAX;
+        } else {
+            int prio = options.optInt("priority");
+            return Math.min(Math.max(prio, PRIORITY_MIN), PRIORITY_MAX);
+        }
     }
 
     /**

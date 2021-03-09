@@ -41,6 +41,7 @@ exports._defaults = {
     icon          : null,
     iconType      : null,
     id            : 0,
+    immediate     : false,
     launch        : true,
     led           : true,
     lockscreen    : true,
