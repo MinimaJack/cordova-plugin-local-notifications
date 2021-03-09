@@ -27,9 +27,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationCompat.MessagingStyle.Message;
-import android.support.v4.media.app.NotificationCompat.MediaStyle;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationCompat.MessagingStyle.Message;
+import androidx.core.media.app.NotificationCompat.MediaStyle;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -44,6 +44,8 @@ import java.util.Random;
 
 import cordova.plugin.notification.action.Action;
 
+import static androidx.core.app.NotificationCompat.VISIBILITY_PUBLIC;
+import static androidx.core.app.NotificationCompat.PRIORITY_MAX;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static cordova.plugin.notification.Notification.EXTRA_UPDATE;
 
@@ -137,12 +139,13 @@ public final class Builder {
                 .setContentTitle(options.getTitle())
                 .setContentText(options.getText())
                 .setTicker(options.getText())
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(options.getText()))
                 .setNumber(options.getNumber())
                 .setAutoCancel(options.isAutoClear())
                 .setOngoing(options.isSticky())
                 .setColor(options.getColor())
-                .setVisibility(options.getVisibility())
-                .setPriority(options.getPrio())
+                .setVisibility(VISIBILITY_PUBLIC)
+                .setPriority(PRIORITY_MAX)
                 .setShowWhen(options.showClock())
                 .setUsesChronometer(options.showChronometer())
                 .setGroup(options.getGroup())
@@ -152,6 +155,16 @@ public final class Builder {
 
         if (!sound.equals(Uri.EMPTY) && !isUpdate()) {
             builder.setSound(sound);
+        }
+
+        // API < 26.  Setting sound to null will prevent playing if we have no sound for any reason,
+        // including a 0 volume.
+        if (options.isWithoutSound()) {
+            builder.setSound(null);
+        }
+
+        if (options.getCategory() != null) {
+            builder.setCategory(options.getCategory());
         }
 
         if (options.isWithProgressBar()) {
@@ -175,12 +188,31 @@ public final class Builder {
             builder.setSmallIcon(options.getSmallIcon());
         }
 
+        if (options.useFullScreenIntent()) {
+            applyFullScreenIntent(builder);
+        }
+
         applyStyle(builder);
         applyActions(builder);
         applyDeleteReceiver(builder);
         applyContentReceiver(builder);
 
         return new Notification(context, options, builder);
+    }
+
+    void applyFullScreenIntent(NotificationCompat.Builder builder) {
+        String pkgName  = context.getPackageName();
+
+        Intent intent = context
+            .getPackageManager()
+            .getLaunchIntentForPackage(pkgName)
+            .putExtra("launchNotificationId", options.getId());
+
+        int reqCode = random.nextInt();
+        // request code and flags not added for demo purposes
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, reqCode, intent, FLAG_UPDATE_CURRENT);
+
+        builder.setFullScreenIntent(pendingIntent, true);
     }
 
     /**
@@ -404,6 +436,10 @@ public final class Builder {
 
         PendingIntent contentIntent = PendingIntent.getService(
                 context, reqCode, intent, FLAG_UPDATE_CURRENT);
+
+        if (options.isImmediate()) {
+            builder.setFullScreenIntent(contentIntent, true);
+        }
 
         builder.setContentIntent(contentIntent);
     }

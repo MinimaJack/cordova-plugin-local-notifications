@@ -19,15 +19,15 @@
  * limitations under the License.
  */
 
-package cordova.plugin.localnotification;
+package cordova.plugin.notification;
 
 import android.os.Bundle;
 
 import cordova.plugin.notification.Notification;
 import cordova.plugin.notification.receiver.AbstractClearReceiver;
 
-import static cordova.plugin.localnotification.LocalNotification.fireEvent;
-import static cordova.plugin.localnotification.LocalNotification.isAppRunning;
+import static cordova.plugin.notification.LocalNotification.fireEvent;
+import static cordova.plugin.notification.LocalNotification.isAppRunning;
 import static cordova.plugin.notification.Request.EXTRA_LAST;
 
 /**

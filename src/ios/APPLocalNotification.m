@@ -104,6 +104,17 @@ UNNotificationPresentationOptions const OptionAlert = UNNotificationPresentation
         for (NSDictionary* options in notifications) {
             APPNotificationContent* notification;
 
+            // Delete an existing alarm with this ID first
+            NSNumber* id = [options objectForKey:@"id"];
+            UNNotificationRequest* oldNotification;
+
+            oldNotification = [_center getNotificationWithId:id];
+
+            if (oldNotification) {
+                [_center cancelNotification:oldNotification];
+            }
+
+            // Schedule the new notification
             notification = [[APPNotificationContent alloc]
                             initWithOptions:options];
 
@@ -481,9 +492,12 @@ UNNotificationPresentationOptions const OptionAlert = UNNotificationPresentation
 {
     UNNotificationRequest* toast = notification.request;
 
-    [_delegate userNotificationCenter:center
+    if (_delegate != nil && ![toast.trigger isKindOfClass:UNCalendarNotificationTrigger.class]) {
+            [_delegate userNotificationCenter:center
               willPresentNotification:notification
                 withCompletionHandler:handler];
+        return;
+    }
 
     if ([toast.trigger isKindOfClass:UNPushNotificationTrigger.class])
         return;
@@ -513,9 +527,12 @@ UNNotificationPresentationOptions const OptionAlert = UNNotificationPresentation
 {
     UNNotificationRequest* toast = response.notification.request;
 
-    [_delegate userNotificationCenter:center
-       didReceiveNotificationResponse:response
-                withCompletionHandler:handler];
+    if (_delegate != nil && ![toast.trigger isKindOfClass:UNCalendarNotificationTrigger.class]) {
+        [_delegate userNotificationCenter:center
+           didReceiveNotificationResponse:response
+                    withCompletionHandler:handler];
+        return;
+    }
 
     handler();
 

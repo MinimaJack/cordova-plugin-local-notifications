@@ -28,11 +28,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.service.notification.StatusBarNotification;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.util.ArraySet;
-import android.support.v4.util.Pair;
+import android.util.Pair;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -44,15 +43,26 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import androidx.collection.ArraySet;
+import androidx.core.app.NotificationCompat;
+
+import cordova.plugin.notification.TriggerReceiver;
 
 import static android.app.AlarmManager.RTC;
 import static android.app.AlarmManager.RTC_WAKEUP;
-import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.M;
-import static android.support.v4.app.NotificationCompat.PRIORITY_HIGH;
-import static android.support.v4.app.NotificationCompat.PRIORITY_MAX;
-import static android.support.v4.app.NotificationCompat.PRIORITY_MIN;
+import static androidx.core.app.NotificationCompat.PRIORITY_HIGH;
+import static androidx.core.app.NotificationCompat.PRIORITY_MAX;
+import static androidx.core.app.NotificationCompat.PRIORITY_MIN;
+import static java.lang.Thread.sleep;
 
 /**
  * Wrapper class around OS notification class. Handles basic operations
@@ -88,6 +98,9 @@ public final class Notification {
 
     // Builder with full configuration
     private final NotificationCompat.Builder builder;
+
+    // Receiver to handle the trigger event
+    private Class<?> receiver = TriggerReceiver.class;
 
     /**
      * Constructor
@@ -177,6 +190,8 @@ public final class Notification {
         Set<String> ids                  = new ArraySet<String>();
         AlarmManager mgr                 = getAlarmMgr();
 
+        this.receiver = receiver;
+
         cancelScheduledAlarms();
 
         do {
@@ -218,7 +233,7 @@ public final class Notification {
                 continue;
 
             PendingIntent pi = PendingIntent.getBroadcast(
-                    context, 0, intent, FLAG_CANCEL_CURRENT);
+                    context, 0, intent, FLAG_UPDATE_CURRENT);
 
             try {
                 switch (options.getPrio()) {
@@ -227,9 +242,10 @@ public final class Notification {
                         break;
                     case PRIORITY_MAX:
                         if (SDK_INT >= M) {
-                            mgr.setExactAndAllowWhileIdle(RTC_WAKEUP, time, pi);
+                            AlarmManager.AlarmClockInfo info = new AlarmManager.AlarmClockInfo(time, pi);
+                            mgr.setAlarmClock(info, pi);
                         } else {
-                            mgr.setExact(RTC, time, pi);
+                            mgr.setExact(RTC_WAKEUP, time, pi);
                         }
                         break;
                     default:
@@ -302,7 +318,7 @@ public final class Notification {
             return;
 
         for (String action : actions) {
-            Intent intent = new Intent(action);
+            Intent intent = new Intent(context, this.receiver).setAction(action);
 
             PendingIntent pi = PendingIntent.getBroadcast(
                     context, 0, intent, 0);
@@ -324,6 +340,7 @@ public final class Notification {
         }
 
         grantPermissionToPlaySoundFromExternal();
+        new NotificationVolumeManager(context, options).adjustAlarmVolume();
         getNotMgr().notify(getId(), builder.build());
     }
 
@@ -336,6 +353,8 @@ public final class Notification {
     void update (JSONObject updates, Class<?> receiver) {
         mergeJSONObjects(updates);
         persist(null);
+
+        this.receiver = receiver;
 
         if (getType() != Type.TRIGGERED)
             return;

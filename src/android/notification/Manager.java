@@ -30,7 +30,7 @@ import android.content.SharedPreferences;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.service.notification.StatusBarNotification;
-import android.support.v4.app.NotificationManagerCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,9 +44,9 @@ import de.appplant.cordova.plugin.badge.BadgeImpl;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.O;
-import static android.support.v4.app.NotificationManagerCompat.IMPORTANCE_DEFAULT;
-import static android.support.v4.app.NotificationManagerCompat.IMPORTANCE_HIGH;
-import static android.support.v4.app.NotificationManagerCompat.IMPORTANCE_LOW;
+import static androidx.core.app.NotificationManagerCompat.IMPORTANCE_DEFAULT;
+import static androidx.core.app.NotificationManagerCompat.IMPORTANCE_HIGH;
+import static androidx.core.app.NotificationManagerCompat.IMPORTANCE_LOW;
 import static cordova.plugin.notification.Notification.PREF_KEY_ID;
 import static cordova.plugin.notification.Notification.Type.TRIGGERED;
 
@@ -109,38 +109,40 @@ public final class Manager {
      *                    for the options provided).
      * @return channel ID of newly created (or reused) channel
      */
-    public String buildChannelWithOptions(Uri soundUri, boolean shouldVibrate,
-                                        boolean hasSound, CharSequence channelName) {
-        String channelId;
+    public String buildChannelWithOptions(Uri soundUri, boolean shouldVibrate, boolean hasSound,
+            CharSequence channelName, String channelId) {
+        String defaultChannelId, newChannelId;
         CharSequence defaultChannelName;
         int importance;
 
         if (hasSound && shouldVibrate) {
-            channelId = Options.CHANNEL_ID_SOUND_VIBRATE;
-            defaultChannelName = Options.CHANNEL_NAME_SOUND_VIBRATE;
+            defaultChannelId = Options.SOUND_VIBRATE_CHANNEL_ID;
+            defaultChannelName = Options.SOUND_VIBRATE_CHANNEL_NAME;
             importance = IMPORTANCE_HIGH;
             shouldVibrate = true;
         } else if (hasSound) {
-            channelId = Options.CHANNEL_ID_SOUND;
-            defaultChannelName = Options.CHANNEL_NAME_SOUND;
+            defaultChannelId = Options.SOUND_CHANNEL_ID;
+            defaultChannelName = Options.SOUND_CHANNEL_NAME;
             importance = IMPORTANCE_DEFAULT;
             shouldVibrate = false;
         } else if (shouldVibrate) {
-            channelId = Options.CHANNEL_ID_VIBRATE;
-            defaultChannelName = Options.CHANNEL_NAME_VIBRATE;
+            defaultChannelId = Options.VIBRATE_CHANNEL_ID;
+            defaultChannelName = Options.VIBRATE_CHANNEL_NAME;
             importance = IMPORTANCE_LOW;
             shouldVibrate = true;
         } else {
-            channelId = Options.CHANNEL_ID_SILENT;
-            defaultChannelName = Options.CHANNEL_NAME_SILENT;
+            defaultChannelId = Options.SILENT_CHANNEL_ID;
+            defaultChannelName = Options.SILENT_CHANNEL_NAME;
             importance = IMPORTANCE_LOW;
             shouldVibrate = false;
         }
 
-        createChannel(channelId, channelName != null ? channelName : defaultChannelName,
-            importance, shouldVibrate, soundUri);
+        newChannelId = channelId != null ? channelId : defaultChannelId;
 
-        return channelId;
+        createChannel(newChannelId, channelName != null ? channelName : defaultChannelName, importance, shouldVibrate,
+                soundUri);
+
+        return newChannelId;
     }
 
     /**
@@ -158,14 +160,12 @@ public final class Manager {
         if (channel != null)
             return;
 
-        channel = new NotificationChannel(
-                channelId, channelName, importance);
+        channel = new NotificationChannel(channelId, channelName, importance);
 
         channel.enableVibration(shouldVibrate);
 
         if (!soundUri.equals(Uri.EMPTY)) {
-            AudioAttributes attributes = new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+            AudioAttributes attributes = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION)
                 .build();
             channel.setSound(soundUri, attributes);
         }
@@ -453,8 +453,7 @@ public final class Manager {
      * Notification manager for the application.
      */
     private NotificationManager getNotMgr() {
-        return (NotificationManager) context.getSystemService(
-                Context.NOTIFICATION_SERVICE);
+        return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     /**

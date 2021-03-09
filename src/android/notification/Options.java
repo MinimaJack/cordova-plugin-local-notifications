@@ -27,8 +27,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationCompat.MessagingStyle.Message;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationCompat.MessagingStyle.Message;
 import android.support.v4.media.session.MediaSessionCompat;
 
 import org.json.JSONArray;
@@ -45,13 +45,13 @@ import cordova.plugin.notification.util.AssetUtil;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.O;
-import static android.support.v4.app.NotificationCompat.DEFAULT_LIGHTS;
-import static android.support.v4.app.NotificationCompat.DEFAULT_SOUND;
-import static android.support.v4.app.NotificationCompat.DEFAULT_VIBRATE;
-import static android.support.v4.app.NotificationCompat.PRIORITY_MAX;
-import static android.support.v4.app.NotificationCompat.PRIORITY_MIN;
-import static android.support.v4.app.NotificationCompat.VISIBILITY_PUBLIC;
-import static android.support.v4.app.NotificationCompat.VISIBILITY_SECRET;
+import static androidx.core.app.NotificationCompat.DEFAULT_LIGHTS;
+import static androidx.core.app.NotificationCompat.DEFAULT_SOUND;
+import static androidx.core.app.NotificationCompat.DEFAULT_VIBRATE;
+import static androidx.core.app.NotificationCompat.PRIORITY_MAX;
+import static androidx.core.app.NotificationCompat.PRIORITY_MIN;
+import static androidx.core.app.NotificationCompat.VISIBILITY_PUBLIC;
+import static androidx.core.app.NotificationCompat.VISIBILITY_SECRET;
 
 /**
  * Wrapper around the JSON object passed through JS which contains all
@@ -87,6 +87,13 @@ public final class Options {
 
     // Default icon path
     private static final String DEFAULT_ICON = "res://icon";
+
+    public final static Integer DEFAULT_RESET_DELAY = 5;
+
+    public final static Integer VOLUME_NOT_SET = -1;
+
+    // Default wakelock timeout
+    public final static Integer DEFAULT_WAKE_LOCK_TIMEOUT = 15000;
 
     // Default icon type
     private static final String DEFAULT_ICON_TYPE = "square";
@@ -219,10 +226,34 @@ public final class Options {
     }
 
     /**
+     * flag to auto-launch the application as the notification fires
+     */
+    public boolean isAutoLaunchingApp() {
+        return options.optBoolean("autoLaunch", true);
+    }
+
+    /**
      * wakeup flag for the notification.
      */
     public boolean shallWakeUp() {
         return options.optBoolean("wakeup", true);
+    }
+
+    /**
+     * Use a fullScreenIntent
+     */
+    public boolean useFullScreenIntent() { return options.optBoolean("fullScreenIntent", true); }
+
+    /**
+     * Whether or not to trigger a notification in the app.
+     */
+    public boolean triggerInApp() { return options.optBoolean("triggerInApp", false); }
+
+    /**
+     * Timeout for wakeup (only used if shallWakeUp() is true)
+     */
+    public int getWakeLockTimeout() {
+        return options.optInt("wakeLockTimeout", DEFAULT_WAKE_LOCK_TIMEOUT);
     }
 
     /**
@@ -236,19 +267,21 @@ public final class Options {
      * The channel id of that notification.
      */
     String getChannel() {
-        // If channel is passed in or we have a low enough SDK for it not to matter, short-circuit.
+        // If we have a low enough SDK for it not to matter,
+        // short-circuit.
+        if (SDK_INT < O) {
+            return DEFAULT_CHANNEL_ID;
+        }
+
         Uri soundUri = getSound();
         boolean hasSound = !isWithoutSound();
         boolean shouldVibrate = isWithVibration();
         CharSequence channelName = options.optString("channelName", null);
+        String channelId = options.optString("channelId", null);
 
-        if (!options.optString("channel").isEmpty() || SDK_INT < O) {
-            String channelId = options.optString("channel", DEFAULT_CHANNEL_ID);
-            Manager.getInstance(context).createChannel(channelId, channelName != null ? channelName : "default-channel-name", 4, shouldVibrate, soundUri);
-            return channelId;
-        }
+        channelId = Manager.getInstance(context).buildChannelWithOptions(soundUri, shouldVibrate, hasSound, channelName,
+                channelId);
 
-        String channelId = Manager.getInstance(context).buildChannelWithOptions(soundUri, shouldVibrate, hasSound, channelName);
         return channelId;
     }
 
@@ -274,8 +307,7 @@ public final class Options {
         String title = options.optString("title", "");
 
         if (title.isEmpty()) {
-            title = context.getApplicationInfo().loadLabel(
-                    context.getPackageManager()).toString();
+            title = context.getApplicationInfo().loadLabel(context.getPackageManager()).toString();
         }
 
         return title;
@@ -290,11 +322,9 @@ public final class Options {
 
         if (cfg instanceof String) {
             hex = options.optString("led");
-        } else
-        if (cfg instanceof JSONArray) {
+        } else if (cfg instanceof JSONArray) {
             hex = options.optJSONArray("led").optString(0);
-        } else
-        if (cfg instanceof JSONObject) {
+        } else if (cfg instanceof JSONObject) {
             hex = options.optJSONObject("led").optString("color");
         }
 
@@ -360,9 +390,7 @@ public final class Options {
             hex = stripHex(hex);
 
             if (hex.matches("[^0-9]*")) {
-                return Color.class
-                        .getDeclaredField(hex.toUpperCase())
-                        .getInt(null);
+                return Color.class.getDeclaredField(hex.toUpperCase()).getInt(null);
             }
 
             int aRGB = Integer.parseInt(hex, 16);
@@ -436,6 +464,23 @@ public final class Options {
     }
 
     /**
+     * Get the volume
+     */
+    public Integer getVolume() {
+        return options.optInt("alarmVolume", VOLUME_NOT_SET);
+    }
+
+    /**
+     * Returns the resetDelay until the sound changes revert back to the users
+     * settings.
+     *
+     * @return resetDelay
+     */
+    public Integer getResetDelay() {
+        return options.optInt("resetDelay", DEFAULT_RESET_DELAY);
+    }
+
+    /**
      * If the phone should vibrate.
      */
     public boolean isWithVibration() {
@@ -475,9 +520,9 @@ public final class Options {
     }
 
     /**
-     * Set the default notification options that will be used.
-     * The value should be one or more of the following fields combined with
-     * bitwise-or: DEFAULT_SOUND, DEFAULT_VIBRATE, DEFAULT_LIGHTS.
+     * Set the default notification options that will be used. The value should be
+     * one or more of the following fields combined with bitwise-or: DEFAULT_SOUND,
+     * DEFAULT_VIBRATE, DEFAULT_LIGHTS.
      */
     int getDefaults() {
         int defaults = options.optInt("defaults", 0);
@@ -490,15 +535,13 @@ public final class Options {
 
         if (isWithDefaultSound()) {
             defaults |= DEFAULT_SOUND;
-        } else
-        if (isWithoutSound()) {
+        } else if (isWithoutSound()) {
             defaults &= DEFAULT_SOUND;
         }
 
         if (isWithDefaultLights()) {
             defaults |= DEFAULT_LIGHTS;
-        } else
-        if (isWithoutLights()) {
+        } else if (isWithoutLights()) {
             defaults &= DEFAULT_LIGHTS;
         }
 
@@ -549,9 +592,7 @@ public final class Options {
      * If the notification shall display a progress bar.
      */
     boolean isWithProgressBar() {
-        return options
-                .optJSONObject("progressBar")
-                .optBoolean("enabled", false);
+        return options.optJSONObject("progressBar").optBoolean("enabled", false);
     }
 
     /**
@@ -560,9 +601,7 @@ public final class Options {
      * @return 0 by default.
      */
     int getProgressValue() {
-        return options
-                .optJSONObject("progressBar")
-                .optInt("value", 0);
+        return options.optJSONObject("progressBar").optInt("value", 0);
     }
 
     /**
@@ -571,9 +610,7 @@ public final class Options {
      * @return 100 by default.
      */
     int getProgressMaxValue() {
-        return options
-                .optJSONObject("progressBar")
-                .optInt("maxValue", 100);
+        return options.optJSONObject("progressBar").optInt("maxValue", 100);
     }
 
     /**
@@ -582,9 +619,7 @@ public final class Options {
      * @return false by default.
      */
     boolean isIndeterminateProgress() {
-        return options
-                .optJSONObject("progressBar")
-                .optBoolean("indeterminate", false);
+        return options.optJSONObject("progressBar").optBoolean("indeterminate", false);
     }
 
     /**
@@ -645,15 +680,13 @@ public final class Options {
 
         if (value instanceof String) {
             groupId = (String) value;
-        } else
-        if (value instanceof JSONArray) {
+        } else if (value instanceof JSONArray) {
             actions = (JSONArray) value;
         }
 
         if (groupId != null) {
             group = ActionGroup.lookup(groupId);
-        } else
-        if (actions != null && actions.length() > 0) {
+        } else if (actions != null && actions.length() > 0) {
             group = ActionGroup.parse(context, actions);
         }
 

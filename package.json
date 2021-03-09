@@ -1,9 +1,9 @@
 {
-  "name": "cordova-plugin-local-notifications-x",
-  "version": "0.9.1",
+  "name": "cordova-plugin-local-notifications",
+  "version": "0.9.2",
   "description": "Schedules and queries for local notifications",
   "cordova": {
-    "id": "cordova-plugin-local-notifications-x",
+    "id": "cordova-plugin-local-notifications",
     "platforms": [
       "android",
       "ios",
@@ -46,10 +46,13 @@
       "version": ">=10.0.0"
     }
   ],
-  "author": "Sebastián Katzer",
+  "authors": [
+    "Sebastián Katzer",
+    "Pavol Cvengros"
+  ],
   "license": "Apache 2.0",
   "bugs": {
-    "url": "https://github.com/katzer/cordova-plugin-local-notifications/issues"
+    "url": "https://github.com/pcvengros/cordova-plugin-local-notifications/issues"
   },
-  "homepage": "https://github.com/katzer/cordova-plugin-local-notifications#readme"
+  "homepage": "https://github.com/pcvengros/cordova-plugin-local-notifications#readme"
 }

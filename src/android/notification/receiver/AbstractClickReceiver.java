@@ -95,25 +95,4 @@ abstract public class AbstractClickReceiver extends IntentService {
         return intent;
     }
 
-    /**
-     * Launch main intent from package.
-     */
-    protected void launchApp() {
-        Context context = getApplicationContext();
-        String pkgName  = context.getPackageName();
-
-        Intent intent = context
-                .getPackageManager()
-                .getLaunchIntentForPackage(pkgName);
-
-        if (intent == null)
-            return;
-
-        intent.addFlags(
-              FLAG_ACTIVITY_REORDER_TO_FRONT
-            | FLAG_ACTIVITY_SINGLE_TOP);
-
-        context.startActivity(intent);
-    }
-
 }

@@ -258,13 +258,13 @@ public final class Request {
      * Gets the base date from where to calculate the next trigger date.
      */
     private Date getBaseDate() {
-        if (spec.has("at")) {
+        if (spec.has("requestBaseDate")) {
+            return new Date(spec.optLong("requestBaseDate"));
+        } else if (spec.has("at")) {
             return new Date(spec.optLong("at", 0));
-        } else
-        if (spec.has("firstAt")) {
+        } else if (spec.has("firstAt")) {
             return new Date(spec.optLong("firstAt", 0));
-        } else
-        if (spec.has("after")) {
+        } else if (spec.has("after")) {
             return new Date(spec.optLong("after", 0));
         } else {
             return new Date();

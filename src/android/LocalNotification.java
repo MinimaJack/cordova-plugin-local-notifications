@@ -19,14 +19,22 @@
  * limitations under the License.
  */
 
-// codebeat:disable[TOO_MANY_FUNCTIONS]
-
-package cordova.plugin.localnotification;
+package cordova.plugin.notification;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.KeyguardManager;
+import android.app.NotificationManager;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PermissionInfo;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.Pair;
 import android.view.View;
 
@@ -43,12 +51,18 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.security.auth.callback.Callback;
+
 import cordova.plugin.notification.Manager;
 import cordova.plugin.notification.Notification;
 import cordova.plugin.notification.Options;
 import cordova.plugin.notification.Request;
 import cordova.plugin.notification.action.ActionGroup;
 
+import static android.Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS;
+import static android.content.Context.POWER_SERVICE;
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.M;
 import static cordova.plugin.notification.Notification.Type.SCHEDULED;
 import static cordova.plugin.notification.Notification.Type.TRIGGERED;
 
@@ -73,10 +87,16 @@ public class LocalNotification extends CordovaPlugin {
     // Launch details
     private static Pair<Integer, String> launchDetails;
 
+    private static int REQUEST_PERMISSIONS_CALL = 10;
+
+    private static int REQUEST_IGNORE_BATTERY_CALL = 20;
+
+    private CallbackContext callbackContext;
+
     /**
-     * Called after plugin construction and fields have been initialized.
-     * Prefer to use pluginInitialize instead since there is no value in
-     * having parameters on the initialize() function.
+     * Called after plugin construction and fields have been initialized. Prefer to
+     * use pluginInitialize instead since there is no value in having parameters on
+     * the initialize() function.
      */
     @Override
     public void initialize (CordovaInterface cordova, CordovaWebView webView) {
@@ -105,23 +125,20 @@ public class LocalNotification extends CordovaPlugin {
     /**
      * Executes the request.
      *
-     * This method is called from the WebView thread. To do a non-trivial
-     * amount of work, use:
-     *      cordova.getThreadPool().execute(runnable);
+     * This method is called from the WebView thread. To do a non-trivial amount of
+     * work, use: cordova.getThreadPool().execute(runnable);
      *
-     * To run on the UI thread, use:
-     *     cordova.getActivity().runOnUiThread(runnable);
+     * To run on the UI thread, use: cordova.getActivity().runOnUiThread(runnable);
      *
      * @param action  The action to execute.
      * @param args    The exec() arguments in JSON form.
-     * @param command The callback context used when calling back into
-     *                JavaScript.
+     * @param command The callback context used when calling back into JavaScript.
      *
      * @return Whether the action was valid.
      */
     @Override
-    public boolean execute (final String action, final JSONArray args,
-                            final CallbackContext command) throws JSONException {
+    public boolean execute (final String action, final JSONArray args, final CallbackContext command)
+            throws JSONException {
 
         if (action.equals("launch")) {
             launch(command);
@@ -132,45 +149,40 @@ public class LocalNotification extends CordovaPlugin {
             public void run() {
                 if (action.equals("ready")) {
                     deviceready();
-                } else
-                if (action.equals("check")) {
+                } else if (action.equals("check")) {
                     check(command);
-                } else
-                if (action.equals("request")) {
+                } else if (action.equals("request")) {
                     request(command);
-                } else
-                if (action.equals("actions")) {
+                } else if (action.equals("actions")) {
                     actions(args, command);
-                } else
-                if (action.equals("schedule")) {
+                } else if (action.equals("schedule")) {
                     schedule(args, command);
-                } else
-                if (action.equals("update")) {
+                } else if (action.equals("update")) {
                     update(args, command);
-                } else
-                if (action.equals("cancel")) {
+                } else if (action.equals("cancel")) {
                     cancel(args, command);
-                } else
-                if (action.equals("cancelAll")) {
+                } else if (action.equals("cancelAll")) {
                     cancelAll(command);
-                } else
-                if (action.equals("clear")) {
+                } else if (action.equals("clear")) {
                     clear(args, command);
-                } else
-                if (action.equals("clearAll")) {
+                } else if (action.equals("clearAll")) {
                     clearAll(command);
-                } else
-                if (action.equals("type")) {
+                } else if (action.equals("type")) {
                     type(args, command);
-                } else
-                if (action.equals("ids")) {
+                } else if (action.equals("ids")) {
                     ids(args, command);
-                } else
-                if (action.equals("notification")) {
+                } else if (action.equals("notification")) {
                     notification(args, command);
-                } else
-                if (action.equals("notifications")) {
+                } else if (action.equals("notifications")) {
                     notifications(args, command);
+                } else if (action.equals("hasDoNotDisturbPermissions")) {
+                    hasDoNotDisturbPermissions(command);
+                } else if (action.equals("requestDoNotDisturbPermissions")) {
+                    requestDoNotDisturbPermissions(command);
+                } else if (action.equals("isIgnoringBatteryOptimizations")) {
+                    isIgnoringBatteryOptimizations(command);
+                } else if (action.equals("requestIgnoreBatteryOptimizations")) {
+                    requestIgnoreBatteryOptimizations(command);
                 }
             }
         });
@@ -179,10 +191,147 @@ public class LocalNotification extends CordovaPlugin {
     }
 
     /**
+     * Determine if do not disturb permissions have been granted
+     *
+     * @return true if we still need to acquire do not disturb permissions.
+     */
+    private boolean needsDoNotDisturbPermissions() {
+        Context mContext = this.cordova.getActivity().getApplicationContext();
+
+        NotificationManager mNotificationManager = (NotificationManager) mContext
+                .getSystemService(Context.NOTIFICATION_SERVICE);
+
+        return SDK_INT >= M && !mNotificationManager.isNotificationPolicyAccessGranted();
+    }
+
+    /**
+     * Determine if we have do not disturb permissions.
+     *
+     * @param command callback context. Returns with true if the we have
+     *                permissions, false if we do not.
+     */
+    private void hasDoNotDisturbPermissions(CallbackContext command) {
+        success(command, !needsDoNotDisturbPermissions());
+    }
+
+    /**
+     * Launch an activity to request do not disturb permissions
+     *
+     * @param command callback context. Returns with results of
+     *                hasDoNotDisturbPermissions after the activity is closed.
+     */
+    private void requestDoNotDisturbPermissions(CallbackContext command) {
+        if (needsDoNotDisturbPermissions()) {
+            this.callbackContext = command;
+
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
+            pluginResult.setKeepCallback(true); // Keep callback
+            command.sendPluginResult(pluginResult);
+
+            Intent intent = new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+
+            cordova.startActivityForResult(this, intent, REQUEST_PERMISSIONS_CALL);
+            return;
+        }
+        success(command, true);
+    }
+
+    /**
+     * Determine if do not battery optimization permissions have been granted
+     *
+     * @return true if we are succcessfully ignoring battery permissions.
+     */
+    private boolean ignoresBatteryOptimizations() {
+        Context mContext = this.cordova.getActivity().getApplicationContext();
+        PowerManager pm = (PowerManager) mContext.getSystemService(POWER_SERVICE);
+
+        return SDK_INT <= M || pm.isIgnoringBatteryOptimizations(mContext.getPackageName());
+    }
+
+    /**
+     * Determine if we have do not disturb permissions.
+     *
+     * @param command callback context. Returns with true if the we have
+     *                permissions, false if we do not.
+     */
+    private void isIgnoringBatteryOptimizations(CallbackContext command) {
+        success(command, ignoresBatteryOptimizations());
+    }
+
+    /**
+     * Launch an activity to request do not disturb permissions
+     *
+     * @param command callback context. Returns with results of
+     *                hasDoNotDisturbPermissions after the activity is closed.
+     */
+    private void requestIgnoreBatteryOptimizations(CallbackContext command) {
+        if (!ignoresBatteryOptimizations()) {
+            this.callbackContext = command;
+
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
+            pluginResult.setKeepCallback(true); // Keep callback
+            command.sendPluginResult(pluginResult);
+
+            String packageName = this.cordova.getContext().getPackageName();
+            String action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS;
+
+            // use the generic intent if we don't have access to request ignore permissions
+            // directly
+            // User can add "REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" to the manifest, but
+            // risks having the app banned.
+            try {
+                PackageManager packageManager = this.cordova.getContext().getPackageManager();
+                PackageInfo pi = packageManager.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
+
+                for (int i = 0; i < pi.requestedPermissions.length; ++i) {
+                    if (pi.requestedPermissions[i].equals(REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)) {
+                        action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS;
+                    }
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                // leave action as default if package not found
+            }
+
+            try {
+                Intent intent = new Intent(action);
+
+                intent.setData(Uri.parse("package:" + packageName));
+
+                cordova.startActivityForResult(this, intent, REQUEST_IGNORE_BATTERY_CALL);
+            } catch (ActivityNotFoundException e) {
+                // could not find the generic ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
+                // and did not have access to launch REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                // Fallback to just figuring out if battery optimizations are removed (probably
+                // not)
+                // since we can't ask the user to set it, because we can't launch an activity.
+                isIgnoringBatteryOptimizations(command);
+                this.callbackContext = null;
+            }
+
+            return;
+        }
+        success(command, true);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_PERMISSIONS_CALL && this.callbackContext != null) {
+            hasDoNotDisturbPermissions(this.callbackContext);
+
+            // clean up callback context.
+            this.callbackContext = null;
+        } else if (requestCode == REQUEST_IGNORE_BATTERY_CALL && this.callbackContext != null) {
+            isIgnoringBatteryOptimizations(this.callbackContext);
+
+            this.callbackContext = null;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    /**
      * Set launchDetails object.
      *
-     * @param command The callback context used when calling back into
-     *                JavaScript.
+     * @param command The callback context used when calling back into JavaScript.
      */
     @SuppressLint("DefaultLocale")
     private void launch(CallbackContext command) {
@@ -555,8 +704,7 @@ public class LocalNotification extends CordovaPlugin {
             params = data.toString();
         }
 
-        js = "cordova.plugins.notification.local.fireEvent(" +
-                "\"" + event + "\"," + params + ")";
+        js = "cordova.plugins.notification.local.fireEvent(\"" + event + "\"," + params + ")";
 
         if (launchDetails == null && !deviceready && toast != null) {
             launchDetails = new Pair<Integer, String>(toast.getId(), event);
@@ -579,9 +727,14 @@ public class LocalNotification extends CordovaPlugin {
 
         final CordovaWebView view = webView.get();
 
-        ((Activity)(view.getContext())).runOnUiThread(new Runnable() {
+        ((Activity) (view.getContext())).runOnUiThread(new Runnable() {
             public void run() {
                 view.loadUrl("javascript:" + js);
+                View engineView = view.getEngine().getView();
+
+                if (!isInForeground()) {
+                    engineView.dispatchWindowVisibilityChanged(View.VISIBLE);
+                }
             }
         });
     }
@@ -589,17 +742,15 @@ public class LocalNotification extends CordovaPlugin {
     /**
      * If the app is running in foreground.
      */
-    private static boolean isInForeground() {
-
+    public static boolean isInForeground() {
         if (!deviceready || webView == null)
             return false;
 
         CordovaWebView view = webView.get();
 
-        KeyguardManager km = (KeyguardManager) view.getContext()
-                .getSystemService(Context.KEYGUARD_SERVICE);
+        KeyguardManager km = (KeyguardManager) view.getContext().getSystemService(Context.KEYGUARD_SERVICE);
 
-        //noinspection SimplifiableIfStatement
+        // noinspection SimplifiableIfStatement
         if (km != null && km.isKeyguardLocked())
             return false;
 
@@ -636,5 +787,3 @@ public class LocalNotification extends CordovaPlugin {
     }
 
 }
-
-// codebeat:enable[TOO_MANY_FUNCTIONS]
