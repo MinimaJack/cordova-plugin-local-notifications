@@ -63,21 +63,20 @@ public final class Options {
     static final String DEFAULT_CHANNEL_ID = "channel-id-default";
 
     // Silent channel
-    static final String CHANNEL_ID_SILENT = "channel-id-silent";
-    static final CharSequence CHANNEL_NAME_SILENT = "Silent Notifications";
+    static final String SILENT_CHANNEL_ID = "channel-id-silent";
+    static final CharSequence SILENT_CHANNEL_NAME = "Silent Notifications";
 
     // Vibrate only channel
-    static final String CHANNEL_ID_VIBRATE = "vibrate-channel-id";
-
-    static final CharSequence CHANNEL_NAME_VIBRATE = "Low Priority Notifications";
+    static final String VIBRATE_CHANNEL_ID = "vibrate-channel-id";
+    static final CharSequence VIBRATE_CHANNEL_NAME = "Low Priority Notifications";
 
     // Sound only channel
-    static final String CHANNEL_ID_SOUND = "sound-channel-id";
-    static final CharSequence CHANNEL_NAME_SOUND = "Medium Priority Notifications";
+    static final String SOUND_CHANNEL_ID = "sound-channel-id";
+    static final CharSequence SOUND_CHANNEL_NAME = "Medium Priority Notifications";
 
     // Sound and vibrate channel
-    static final String CHANNEL_ID_SOUND_VIBRATE = "sound-vibrate-channel-id";
-    static final CharSequence CHANNEL_NAME_SOUND_VIBRATE = "High Priority Notifications";
+    static final String SOUND_VIBRATE_CHANNEL_ID = "sound-vibrate-channel-id";
+    static final CharSequence SOUND_VIBRATE_CHANNEL_NAME = "High Priority Notifications";
 
     // Key name for bundled sound extra
     static final String EXTRA_SOUND = "NOTIFICATION_SOUND";

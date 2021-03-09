@@ -111,6 +111,7 @@ public final class Manager {
      */
     public String buildChannelWithOptions(Uri soundUri, boolean shouldVibrate, boolean hasSound,
             CharSequence channelName, String channelId) {
+
         String defaultChannelId, newChannelId;
         CharSequence defaultChannelName;
         int importance;

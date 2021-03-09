@@ -29,7 +29,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationCompat.MessagingStyle.Message;
-import androidx.core.media.app.NotificationCompat.MediaStyle;
+import androidx.media.app.NotificationCompat.MediaStyle;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -161,10 +161,6 @@ public final class Builder {
         // including a 0 volume.
         if (options.isWithoutSound()) {
             builder.setSound(null);
-        }
-
-        if (options.getCategory() != null) {
-            builder.setCategory(options.getCategory());
         }
 
         if (options.isWithProgressBar()) {
