@@ -182,6 +182,10 @@
             target-dir="src/cordova/plugin/notification/receiver" />
 
         <source-file
+            src="src/android/notification/receiver/AbstractNotificationReceiver.java"
+            target-dir="src/cordova/plugin/notification/receiver" />
+
+        <source-file
             src="src/android/notification/receiver/AbstractRestoreReceiver.java"
             target-dir="src/cordova/plugin/notification/receiver" />
 
